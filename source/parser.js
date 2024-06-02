@@ -7,12 +7,14 @@ const _repeat = require("lodash.repeat");
 function getParagraphTag(p) {
   const tags = {
     NORMAL_TEXT: "p",
+    TITLE: "header",
     SUBTITLE: "blockquote",
     HEADING_1: "h1",
     HEADING_2: "h2",
     HEADING_3: "h3",
     HEADING_4: "h4",
     HEADING_5: "h5",
+    HEADING_6: "h6",
   };
 
   return tags[p.paragraphStyle.namedStyleType];
@@ -216,7 +218,9 @@ function convertGoogleDocumentToJson(document) {
           }
 
           // Headings, Texts
-          else if (el.textRun && el.textRun.content !== "\n") {
+          else if (el.textRun && el.textRun.content !== "\n" ||
+                   el.textRun && el.textRun.content !== " " ||
+                   el.textRun && el.textRun.content !== "") {
             tagContent.push({
               [tag]: getText(el, {
                 isHeader: tag !== "p",
@@ -291,6 +295,11 @@ function convertGoogleDocumentToJson(document) {
 // Add extra converter for footnotes
 json2md.converters.footnote = function (footnote) {
   return `[^${footnote.number}]: ${footnote.text}`;
+};
+
+// Add extra converter for title (header)
+json2md.converters.header = function (header) {
+  return header;
 };
 
 function convertJsonToMarkdown({ content, metadata }) {
