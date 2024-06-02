@@ -10,13 +10,20 @@ const docs = google.docs({
   version: "v1",
 });
 
+const drive = google.drive({
+  version: "v3",
+});
+
 async function parseGoogleDocs(configuration = {}) {
   const clientEmail =
     configuration.clientEmail || process.env.PARSE_GOOGLE_DOCS_CLIENT_EMAIL;
   const privateKey =
     configuration.privateKey || process.env.PARSE_GOOGLE_DOCS_PRIVATE_KEY;
   const documentId = configuration.documentId;
-  const scopes = ["https://www.googleapis.com/auth/documents.readonly"];
+  const scopes = [
+    "https://www.googleapis.com/auth/documents.readonly",
+    "https://www.googleapis.com/auth/drive.readonly"
+  ];
 
   if (!clientEmail) {
     throw new Error('Please, provide "clientEmail" in the constructor');
@@ -37,11 +44,20 @@ async function parseGoogleDocs(configuration = {}) {
     documentId: documentId,
   });
 
+  const driveResponse = await drive.files.get({
+    auth: jwt,
+    fileId: documentId,
+    fields: "id, mimeType, lastModifyingUser, modifiedTime",
+  });
+
   function toJson() {
     const jsonDocument = convertGoogleDocumentToJson(docsResponse.data);
 
     return {
-      metadata: { title: docsResponse.data.title },
+      metadata: {
+        title: docsResponse.data.title,
+        ...driveResponse.data,
+      },
       ...jsonDocument,
     };
   }
