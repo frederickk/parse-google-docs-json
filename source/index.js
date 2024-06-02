@@ -44,10 +44,14 @@ async function parseGoogleDocs(configuration = {}) {
     documentId: documentId,
   });
 
+  // https://developers.google.com/drive/api/reference/rest/v3/files
   const driveResponse = await drive.files.get({
     auth: jwt,
+    corpora: "allDrives",
     fileId: documentId,
     fields: "id, mimeType, lastModifyingUser, modifiedTime",
+    includeItemsFromAllDrives: true,
+    supportsAllDrives: true,
   });
 
   function toJson() {
