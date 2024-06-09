@@ -104,8 +104,9 @@ function getText(element, { isHeader = false } = {}) {
     text = `_${text}_`;
   }
 
+  // Italic defaults to strong
   if (italic) {
-    text = `_${text}_`;
+    text = `*${text}*`;
   }
 
   // Set bold unless it's a header
